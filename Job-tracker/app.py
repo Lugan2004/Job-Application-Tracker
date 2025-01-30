@@ -12,6 +12,7 @@ EXCEL_FILE = 'jobs.xlsx'
 if not os.path.exists(EXCEL_FILE):
     wb = openpyxl.Workbook()
     ws = wb.active
+    # Add headers
     ws.append(['Company Name', 'Salary', 'Date Applied', 'Decision Status'])
     wb.save(EXCEL_FILE)
 
