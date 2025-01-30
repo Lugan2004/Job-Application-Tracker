@@ -9,15 +9,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Apply Poppins font to the entire app -->
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
+        .animated-heading {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #2c5282, #4299e1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            padding: 0.5rem;
+            animation: fadeIn 1.5s ease-out;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
-    </style>
+        
+        .animated-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #2c5282, #4299e1);
+            transition: width 0.3s ease-in-out;
+        }
+        
+        .animated-heading:hover::after {
+            width: 60%;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        </style>
 </head>
 <body class="bg-gray-100">
-    <div class="container mx-auto p-8">
+    <div class="container mx-auto w-7xl p-8">
         <!-- Header -->
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Job Application Tracker</h1>
+        <h1 class="animated-heading font-semibold">Job Application Tracker</h1>
 
         <!-- Form -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -54,20 +92,6 @@
             </form>
         </div>
 
-        <!-- Download and Clear All Buttons -->
-        <div class="flex justify-center space-x-4 mb-8">
-            <a href="{{ url_for('download_file') }}"
-               class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                Download Excel File
-            </a>
-            <form method="POST" action="{{ url_for('clear_all') }}">
-                <button type="submit"
-                        class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    Clear All
-                </button>
-            </form>
-        </div>
-
         <!-- Preview Table -->
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Job Applications Preview</h2>
@@ -96,14 +120,37 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for job in jobs %}
-                        <tr>
+                        <tr id="row-{{ loop.index0 }}">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ loop.index }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ job[0] }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ job[1] }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ job[2] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ job[3] }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <form method="POST" action="{{ url_for('delete_job', row_index=loop.index0) }}">
+                                <!-- Color-coded status text -->
+                                <span id="status-{{ loop.index0 }}" 
+                                      class="{% if job[3] == 'Interview Offered' %}bg-green-200
+                                             {% elif job[3] == 'Rejected' %}bg-red-200
+                                             {% elif job[3] == 'Pending' %}bg-purple-200
+                                             {% endif %}">
+                                    {{ job[3] }}
+                                </span>
+                                <!-- Dropdown for editing -->
+                                <select id="edit-status-{{ loop.index0 }}" class="hidden mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Interview Offered">Interview Offered</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <button onclick="enableEdit({{ loop.index0 }})"
+                                        class="bg-yellow-500 text-white py-1 px-2 rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                    Edit
+                                </button>
+                                <button onclick="saveEdit({{ loop.index0 }})" id="save-btn-{{ loop.index0 }}"
+                                        class="hidden bg-green-600 text-white py-1 px-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    Save
+                                </button>
+                                <form method="POST" action="{{ url_for('delete_job', row_index=loop.index0) }}" class="inline">
                                     <button type="submit"
                                             class="bg-red-600 text-white py-1 px-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
                                         Delete
@@ -115,6 +162,56 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Download and Clear All Buttons -->
+        <div class="flex justify-center space-x-4 mb-8 mt-8">
+            <a href="{{ url_for('download_file') }}"
+                class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                Download Excel File
+            </a>
+            <form method="POST" action="{{ url_for('clear_all') }}">
+                <button type="submit"
+                        class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    Clear All
+                </button>
+            </form>
+        </div>
     </div>
+
+    <script>
+        function enableEdit(rowIndex) {
+            // Hide the status text and show the dropdown
+            document.getElementById(`status-${rowIndex}`).classList.add('hidden');
+            document.getElementById(`edit-status-${rowIndex}`).classList.remove('hidden');
+
+            // Hide the Edit button and show the Save button
+            document.getElementById(`save-btn-${rowIndex}`).classList.remove('hidden');
+        }
+
+        function saveEdit(rowIndex) {
+            const newStatus = document.getElementById(`edit-status-${rowIndex}`).value;
+
+            // Send an AJAX request to update the status
+            fetch(`/update_status/${rowIndex}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `new_status=${encodeURIComponent(newStatus)}`,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the status text
+                    document.getElementById(`status-${rowIndex}`).textContent = newStatus;
+                    document.getElementById(`status-${rowIndex}`).classList.remove('hidden');
+                    document.getElementById(`edit-status-${rowIndex}`).classList.add('hidden');
+
+                    // Hide the Save button and show the Edit button
+                    document.getElementById(`save-btn-${rowIndex}`).classList.add('hidden');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

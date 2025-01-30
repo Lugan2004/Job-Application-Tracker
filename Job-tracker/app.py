@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify
 import openpyxl
 import os
 from datetime import datetime
@@ -64,6 +64,22 @@ def delete_job(row_index):
     wb.save(EXCEL_FILE)
 
     return redirect(url_for('index'))
+
+@app.route('/update_status/<int:row_index>', methods=['POST'])
+def update_status(row_index):
+    new_status = request.form['new_status']
+
+    # Load the Excel file
+    wb = openpyxl.load_workbook(EXCEL_FILE)
+    ws = wb.active
+
+    # Update the decision status for the specified row
+    ws.cell(row=row_index + 2, column=4).value = new_status  # Column 4 is Decision Status
+
+    # Save the Excel file
+    wb.save(EXCEL_FILE)
+
+    return jsonify(success=True)
 
 @app.route('/clear', methods=['POST'])
 def clear_all():
