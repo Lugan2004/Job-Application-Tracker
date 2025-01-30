@@ -4,9 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Application Tracker</title>
+    <!-- Add Poppins font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Apply Poppins font to the entire app -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100">
     <div class="container mx-auto p-8">
         <!-- Header -->
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Job Application Tracker</h1>
@@ -28,6 +36,20 @@
                 <button type="submit"
                         class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     Submit
+                </button>
+            </form>
+        </div>
+
+        <!-- Download and Clear All Buttons -->
+        <div class="flex justify-center space-x-4 mb-8">
+            <a href="{{ url_for('download_file') }}"
+               class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                Download Excel File
+            </a>
+            <form method="POST" action="{{ url_for('clear_all') }}">
+                <button type="submit"
+                        class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    Clear All
                 </button>
             </form>
         </div>
@@ -70,20 +92,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-
-        <!-- Download and Clear All Buttons -->
-        <div class="flex justify-center space-x-4 mb-8 mt-8">
-            <a href="{{ url_for('download_file') }}"
-                class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                Download Excel File
-            </a>
-            <form method="POST" action="{{ url_for('clear_all') }}">
-                <button type="submit"
-                        class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    Clear All
-                </button>
-            </form>
         </div>
     </div>
 </body>
