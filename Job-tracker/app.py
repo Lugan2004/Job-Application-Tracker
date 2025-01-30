@@ -20,6 +20,13 @@ def index():
         company_name = request.form['company_name']
         salary = request.form['salary']
 
+        # Set salary to "Not Specified" if empty
+        if not salary:
+            salary = "Not Specified"
+        else:
+            # Add "ZAR" prefix to salary
+            salary = f"ZAR {salary}"
+
         # Load the Excel file
         wb = openpyxl.load_workbook(EXCEL_FILE)
         ws = wb.active
@@ -36,7 +43,7 @@ def index():
     wb = openpyxl.load_workbook(EXCEL_FILE)
     ws = wb.active
     jobs = []
-    for row in ws.iter_rows(min_row=1, values_only=True):
+    for row in ws.iter_rows(min_row=2, values_only=True):  # Skip header row
         jobs.append(row)
 
     return render_template('index.html', jobs=jobs)
