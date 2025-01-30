@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file
 import openpyxl
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -11,7 +12,7 @@ EXCEL_FILE = 'jobs.xlsx'
 if not os.path.exists(EXCEL_FILE):
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.append(['Company Name', 'Salary'])
+    ws.append(['Company Name', 'Salary', 'Date Applied', 'Decision Status'])
     wb.save(EXCEL_FILE)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -19,6 +20,8 @@ def index():
     if request.method == 'POST':
         company_name = request.form['company_name']
         salary = request.form['salary']
+        date_applied = request.form['date_applied']
+        decision_status = request.form['decision_status']
 
         # Set salary to "Not Specified" if empty
         if not salary:
@@ -32,7 +35,7 @@ def index():
         ws = wb.active
 
         # Append the new job application
-        ws.append([company_name, salary])
+        ws.append([company_name, salary, date_applied, decision_status])
 
         # Save the Excel file
         wb.save(EXCEL_FILE)
